@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -e
+
+cd $(dirname $0)
+
+if [[ ! -d $1 ]]; then
+	echo "Please enter a valid directory"
+	exit 1
+fi
+
+docker build --build-arg SRCDIR="${1}" -t $(whoami)/myirc .

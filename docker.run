@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+set -e
+
+cd $(dirname $0)
+
+if [[ "$1" == "" ]]; then
+	echo "Please enter a login"
+	exit 1
+fi
+
+rm -rf $1
+git clone git@git.epitech.eu:/$1/PSU_2015_myirc $1
+
+docker kill myirc 2>&1 > /dev/null || echo ""
+docker rm myirc 2>&1 > /dev/null || echo ""
+
+./docker.build $1
+
+docker run -it -w /app --name myirc -P -d $(whoami)/myirc
+clear
+sleep 1
+
+CONF_HOST="$(docker-machine ip default)"
+CONF_PORT="$(docker inspect myirc | jq -r '.[0].NetworkSettings.Ports["6667/tcp"][0].HostPort')"
+
+./MyIrcTester -- "${CONF_HOST}" "${CONF_PORT}" "$(whoami)" "$(whoami)" "$(whoami)"
+
+docker kill myirc 2>&1 > /dev/null || echo ""
+docker rm myirc 2>&1 > /dev/null || echo ""
